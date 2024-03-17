@@ -7,9 +7,9 @@ metadata:
     app: postgres
 spec:
   ports:
-  - port: 5432
-    name: postgres-port
-    targetPort: postgres-port
+    - port: 5432
+      name: postgres-port
+      targetPort: postgres-port
   clusterIP: None
   selector:
     app: postgres
@@ -23,10 +23,10 @@ metadata:
     app: postgres
 spec:
   ports:
-  - port: 5432
-    name: postgres-port
-    targetPort: postgres-port
-    nodePort: 32543
+    - port: 5432
+      name: postgres-port
+      targetPort: postgres-port
+      nodePort: 32543
   type: NodePort
   selector:
     app: postgres
@@ -40,20 +40,20 @@ type: Opaque
 stringData:
   POSTGRES_USER: admin
   POSTGRES_PASSWORD: password
---- 
+---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: &app postgres 
+  name: &app postgres
 spec:
   selector:
     matchLabels:
       app: *app
       version: &version "16.2"
   serviceName: postgres-headless
-  replicas: 1 
-  minReadySeconds: 10 
-  
+  replicas: 1
+  minReadySeconds: 10
+
   template:
     metadata:
       labels:
@@ -82,13 +82,13 @@ spec:
               cpu: "1"
               memory: "1024Mi"
   volumeClaimTemplates:
-  - metadata:
-      name: postgresdata
-    spec:
-      accessModes: [ "ReadWriteOnce" ]
-      resources:
-        requests:
-          storage: 2Gi 
+    - metadata:
+        name: postgresdata
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 5Gi
 ---
 kind: PersistentVolumeClaim
 apiVersion: v1
@@ -136,39 +136,39 @@ spec:
         app: pgadmin
     spec:
       initContainers:
-      - name: busybox
-        image: busybox:1.34.1
-        imagePullPolicy: IfNotPresent
-        command:
-          - 'sh'
-          - '-c'
-          - 'chown 5050:5050 /tmp/mount'
-        volumeMounts:
-          - mountPath: /tmp/mount
-            name: state
+        - name: busybox
+          image: busybox:1.34.1
+          imagePullPolicy: IfNotPresent
+          command:
+            - "sh"
+            - "-c"
+            - "chown 5050:5050 /tmp/mount"
+          volumeMounts:
+            - mountPath: /tmp/mount
+              name: state
       containers:
-      - name: pgadmin
-        image: dpage/pgadmin4:8.4
-        imagePullPolicy: IfNotPresent
-        ports:
-          - containerPort: 80
-            name: http
-            protocol: TCP
-        env:
-          - name: PGADMIN_DEFAULT_EMAIL
-            value: "dpkrane@dpkrane.ru"
-          - name: PGADMIN_DEFAULT_PASSWORD
-            value: "password"
-        resources:
-          requests:
-            memory: "100Mi"
-            cpu: "0.2"
-          limits:
-            memory: "800Mi"
-            cpu: "0.8"
-        volumeMounts:
-          - mountPath: /var/lib/pgadmin
-            name: state
+        - name: pgadmin
+          image: dpage/pgadmin4:8.4
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+              name: http
+              protocol: TCP
+          env:
+            - name: PGADMIN_DEFAULT_EMAIL
+              value: "dpkrane@dpkrane.ru"
+            - name: PGADMIN_DEFAULT_PASSWORD
+              value: "password"
+          resources:
+            requests:
+              memory: "100Mi"
+              cpu: "0.2"
+            limits:
+              memory: "800Mi"
+              cpu: "0.8"
+          volumeMounts:
+            - mountPath: /var/lib/pgadmin
+              name: state
       volumes:
         - name: state
           persistentVolumeClaim:
@@ -206,5 +206,5 @@ spec:
                   name: http
   tls:
     - hosts:
-      - pg.dpkrane.local
+        - pg.dpkrane.local
       secretName: pg-tls
